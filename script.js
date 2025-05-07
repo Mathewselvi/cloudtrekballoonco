@@ -609,3 +609,247 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+// Enhanced mobile responsiveness for Cloud Trek Balloon Co
+
+// Fix iOS height issues - improved version
+document.addEventListener('DOMContentLoaded', function() {
+    // Set correct viewport height for mobile browsers
+    function setVhProperty() {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    
+    // Call on initial load
+    setVhProperty();
+    
+    // Call on resize and on orientation change
+    window.addEventListener('resize', setVhProperty);
+    window.addEventListener('orientationchange', setVhProperty);
+});
+
+// Improved mobile menu functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.querySelector('.menu-toggle');
+    const navLinks = document.querySelector('.nav-links');
+    const navLinksItems = document.querySelectorAll('.nav-links a');
+    
+    // Toggle menu function
+    menuToggle.addEventListener('click', function() {
+        navLinks.classList.toggle('active');
+        menuToggle.classList.toggle('active');
+        
+        if (navLinks.classList.contains('active')) {
+            menuToggle.innerHTML = '<i class="fas fa-times"></i>';
+            document.body.style.overflow = 'hidden'; // Prevent scrolling when menu is open
+        } else {
+            menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+            document.body.style.overflow = ''; // Re-enable scrolling
+        }
+    });
+    
+    // Close menu when clicking on links - improved for mobile
+    navLinksItems.forEach(link => {
+        link.addEventListener('click', () => {
+            // Small delay to allow the smooth scroll to start before closing menu
+            setTimeout(() => {
+                navLinks.classList.remove('active');
+                menuToggle.classList.remove('active');
+                menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+                document.body.style.overflow = ''; // Re-enable scrolling
+            }, 100);
+        });
+    });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', function(event) {
+        if (navLinks.classList.contains('active') && 
+            !navLinks.contains(event.target) && 
+            !menuToggle.contains(event.target)) {
+            navLinks.classList.remove('active');
+            menuToggle.classList.remove('active');
+            menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+            document.body.style.overflow = ''; // Re-enable scrolling
+        }
+    });
+});
+
+// Improve mobile gallery experience
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if we're on mobile
+    const isMobile = window.innerWidth < 768;
+    
+    if (isMobile) {
+        // Make gallery images tappable with proper feedback
+        const galleryItems = document.querySelectorAll('.gallery-item');
+        
+        galleryItems.forEach(item => {
+            item.addEventListener('touchstart', function() {
+                this.style.opacity = '0.8';
+            });
+            
+            item.addEventListener('touchend', function() {
+                this.style.opacity = '1';
+            });
+        });
+        
+        // Improve modal navigation on mobile
+        const modal = document.getElementById('gallery-modal');
+        if (modal) {
+            // Add swipe functionality for gallery navigation
+            let touchStartX = 0;
+            let touchEndX = 0;
+            
+            modal.addEventListener('touchstart', function(e) {
+                touchStartX = e.changedTouches[0].screenX;
+            }, false);
+            
+            modal.addEventListener('touchend', function(e) {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, false);
+            
+            function handleSwipe() {
+                const swipeThreshold = 50;
+                if (touchEndX < touchStartX - swipeThreshold) {
+                    // Swipe left - next image
+                    document.querySelector('.modal-next').click();
+                } else if (touchEndX > touchStartX + swipeThreshold) {
+                    // Swipe right - previous image
+                    document.querySelector('.modal-prev').click();
+                }
+            }
+        }
+    }
+});
+
+// Improve scroll performance on mobile
+document.addEventListener('DOMContentLoaded', function() {
+    // Use IntersectionObserver for more efficient scroll animations
+    if ('IntersectionObserver' in window) {
+        const revealElements = document.querySelectorAll('.reveal');
+        
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    // Unobserve after animation is triggered
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.15,
+            rootMargin: '0px 0px -50px 0px'
+        });
+        
+        revealElements.forEach(element => {
+            revealObserver.observe(element);
+        });
+    } else {
+        // Fallback for browsers that don't support IntersectionObserver
+        function revealElementsOnScroll() {
+            const elements = document.querySelectorAll('.reveal:not(.active)');
+            const windowHeight = window.innerHeight;
+            
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                if (elementTop < windowHeight - 50) {
+                    element.classList.add('active');
+                }
+            });
+        }
+        
+        // Check on scroll
+        window.addEventListener('scroll', revealElementsOnScroll);
+        // Initial check
+        revealElementsOnScroll();
+    }
+});
+
+// Add lazy loading for images to improve mobile performance
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if browser supports native lazy loading
+    if ('loading' in HTMLImageElement.prototype) {
+        // Add loading="lazy" to all images
+        const images = document.querySelectorAll('img:not([loading])');
+        images.forEach(img => {
+            img.setAttribute('loading', 'lazy');
+        });
+    } else {
+        // Fallback for browsers that don't support native lazy loading
+        const lazyImages = document.querySelectorAll('img:not([src])');
+        lazyImages.forEach(img => {
+            img.setAttribute('loading', 'lazy');
+            
+            // Store the actual src in data-src
+            if (img.src) {
+                img.setAttribute('data-src', img.src);
+                img.removeAttribute('src');
+            }
+        });
+        
+        // Load images when they enter the viewport
+        if ('IntersectionObserver' in window) {
+            const lazyImageObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const lazyImage = entry.target;
+                        lazyImage.src = lazyImage.dataset.src;
+                        lazyImageObserver.unobserve(lazyImage);
+                    }
+                });
+            });
+            
+            lazyImages.forEach(lazyImage => {
+                lazyImageObserver.observe(lazyImage);
+            });
+        }
+    }
+});
+
+// Optimize Back to Top button for mobile
+document.addEventListener('DOMContentLoaded', function() {
+    const backToTop = document.querySelector('.back-to-top');
+    
+    if (backToTop) {
+        // Show/hide Back to Top button
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 300) {
+                backToTop.classList.add('active');
+            } else {
+                backToTop.classList.remove('active');
+            }
+        });
+        
+        // Add touch feedback
+        backToTop.addEventListener('touchstart', function() {
+            this.style.backgroundColor = '#1A2942'; // Change color on touch
+        });
+        
+        backToTop.addEventListener('touchend', function() {
+            this.style.backgroundColor = ''; // Reset color
+        });
+    }
+});
+
+// Handle resize events more efficiently
+let resizeTimer;
+window.addEventListener('resize', function() {
+    // Clear the timeout
+    clearTimeout(resizeTimer);
+    
+    // Set a new timeout to only trigger after resizing has stopped
+    resizeTimer = setTimeout(function() {
+        // Update mobile-specific adjustments
+        const isMobile = window.innerWidth < 768;
+        const navLinks = document.querySelector('.nav-links');
+        const menuToggle = document.querySelector('.menu-toggle');
+        
+        // Reset nav state when resizing from mobile to desktop
+        if (!isMobile && navLinks.classList.contains('active')) {
+            navLinks.classList.remove('active');
+            menuToggle.classList.remove('active');
+            menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+            document.body.style.overflow = '';
+        }
+    }, 250); // Execute after 250ms of no resizing
+});
