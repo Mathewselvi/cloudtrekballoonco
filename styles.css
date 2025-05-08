@@ -145,6 +145,7 @@ section {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: relative;
 }
 
 .logo {
@@ -165,7 +166,7 @@ section {
 }
 
 .menu-toggle {
-    display: block; /* Always display on mobile first */
+    display: none; /* Hidden by default, shown on mobile */
     cursor: pointer;
     font-size: 24px;
     color: var(--secondary-color);
@@ -222,11 +223,57 @@ section {
     color: var(--primary-color);
 }
 
+/* Video Slideshow Styles */
+.video-slideshow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.video-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out;
+    z-index: 1;
+}
+
+.video-slide.active {
+    opacity: 1;
+    z-index: 2;
+}
+
+.video-slide video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 3;
+}
+
 /* Hero Section Enhancement */
 #hero {
     height: 100vh;
     min-height: 500px; /* Minimum height for very small screens */
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('balloon.jpg') center/cover no-repeat;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -240,7 +287,7 @@ section {
 .hero-content {
     max-width: 100%;
     padding: 0 15px;
-    z-index: 2;
+    z-index: 4; /* Ensure content is above video and overlay */
 }
 
 .hero-title {
@@ -1275,9 +1322,20 @@ footer {
     box-shadow: 0 12px 25px rgba(26, 41, 66, 0.3);
 }
 
-/* Additional iOS fixes */
-/* Fix for 100vh issue on iOS Safari */
+/* Fix for iOS video playback */
 @supports (-webkit-touch-callout: none) {
+    .video-slide video {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        min-width: 100%;
+        min-height: 100%;
+        width: auto;
+        height: auto;
+        transform: translateX(-50%) translateY(-50%);
+    }
+    
+    /* Fix for 100vh issue on iOS Safari */
     #hero {
         height: -webkit-fill-available;
     }
@@ -1285,6 +1343,142 @@ footer {
     /* Fix for background-attachment: fixed not working on iOS */
     #why-munnar {
         background-attachment: scroll;
+    }
+}
+
+/* Mobile Menu Styles - Fixed */
+@media (max-width: 991px) {
+    .menu-toggle {
+        display: block;
+        cursor: pointer;
+        font-size: 24px;
+        color: var(--secondary-color);
+        padding: 10px;
+        z-index: 1002;
+        background: transparent;
+        border: none;
+        outline: none;
+        position: relative;
+    }
+    
+    /* Menu toggle hover effect */
+    .menu-toggle:hover {
+        color: var(--primary-color);
+    }
+    
+    /* Active state for menu toggle */
+    .menu-toggle.active {
+        color: var(--primary-color);
+    }
+    
+    /* Fixed navigation links for mobile */
+    .nav-links {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 80%;
+        height: 100vh;
+        background-color: var(--secondary-color);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease-in-out;
+        z-index: 1001;
+        padding: 50px 0;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Show the menu when active */
+    .nav-links.active {
+        right: 0;
+    }
+    
+    /* Navigation link items in mobile menu */
+    .nav-links li {
+        margin: 15px 0;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInDown 0.5s forwards;
+        animation-delay: calc(0.1s * var(--item-index, 0));
+    }
+    
+    /* Apply indices for staggered animation */
+    .nav-links li:nth-child(1) { --item-index: 1; }
+    .nav-links li:nth-child(2) { --item-index: 2; }
+    .nav-links li:nth-child(3) { --item-index: 3; }
+    .nav-links li:nth-child(4) { --item-index: 4; }
+    .nav-links li:nth-child(5) { --item-index: 5; }
+    .nav-links li:nth-child(6) { --item-index: 6; }
+    .nav-links li:nth-child(7) { --item-index: 7; }
+    
+    /* Navigation links appearance in mobile menu */
+    .nav-link {
+        color: var(--text-light) !important;
+        font-size: 18px;
+        padding: 10px 25px;
+        display: block;
+        text-align: center;
+        width: 100%;
+    }
+    
+    /* Active link styling */
+    .nav-link.active {
+        color: var(--primary-color) !important;
+    }
+    
+    /* Navigation link hover effect */
+    .nav-link:hover {
+        color: var(--primary-color) !important;
+    }
+    
+    /* Fade-in animation for menu items */
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}
+
+/* Mobile responsiveness for video slideshow */
+@media (max-width: 767px) {
+    .video-slide video {
+        object-position: center center;
+    }
+    
+    .menu-toggle {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    
+    .nav-container {
+        position: relative;
+    }
+}
+
+/* Fix for very narrow screens */
+@media (max-width: 360px) {
+    .hero-title {
+        font-size: 2.2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .hero-tagline {
+        font-size: 0.9rem;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        font-size: 14px;
     }
 }
 
@@ -1369,15 +1563,32 @@ footer {
         height: auto;
         background-color: transparent;
         flex-direction: row;
+        padding: 0;
+        box-shadow: none;
     }
     
     .nav-links li {
         margin-left: 30px;
+        opacity: 1;
+        transform: translateY(0);
+        animation: none;
     }
     
     .nav-links a {
         color: var(--secondary-color);
         font-size: 15px;
+        padding: 8px 5px;
+        display: inline-block;
+        text-align: left;
+        width: auto;
+    }
+    
+    .nav-link {
+        color: var(--secondary-color) !important;
+    }
+    
+    .nav-link.active, .nav-link:hover {
+        color: var(--primary-color) !important;
     }
     
     .munnar-grid {
@@ -1394,104 +1605,5 @@ footer {
     
     .gallery-grid {
         grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-/* Additional mobile menu styles */
-@media (max-width: 991px) {
-    .menu-toggle {
-        display: block;
-        position: absolute;
-        right: 20px;
-        top: 50%;
-        transform: translateY(-50%);
-    }
-    
-    .nav-links {
-        position: fixed;
-        top: 0;
-        right: -100%;
-        width: 80%;
-        height: 100vh;
-        background-color: var(--secondary-color);
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        transition: var(--transition);
-        z-index: 1001;
-    }
-    
-    .nav-links.active {
-        right: 0;
-    }
-    
-    .nav-links li {
-        margin: 15px 0;
-    }
-    
-    .nav-link {
-        color: var(--text-light);
-        font-size: 18px;
-        padding: 10px 15px;
-    }
-    
-    /* Adjust padding for touch screens */
-    .btn, .contact-button {
-        padding: 14px 30px;
-    }
-}
-
-/* Small devices (575px and down) */ 
-@media (max-width: 575px) {
-    .section-title {
-        font-size: 2rem;
-    }
-    
-    .hero-title {
-        margin-bottom: 15px;
-    }
-    
-    .hero-subtitle {
-        margin-bottom: 10px;
-    }
-    
-    .btn {
-        padding: 12px 25px;
-    }
-    
-    .feature {
-        padding: 25px 20px;
-    }
-    
-    .service-image {
-        padding-bottom: 70%; /* Slightly taller aspect ratio on very small screens */
-    }
-    
-    .service-content {
-        padding: 20px 15px;
-    }
-    
-    .social-grid {
-        gap: 10px;
-    }
-    
-    .social-card {
-        padding: 15px 10px;
-    }
-    
-    .social-card i {
-        font-size: 1.5rem;
-    }
-    
-    .social-card span {
-        font-size: 13px;
-    }
-    
-    .map-container {
-        height: 300px;
-    }
-    
-    .footer-links li {
-        margin: 5px 10px;
     }
 }
